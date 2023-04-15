@@ -231,8 +231,8 @@ class Knight(Piece):
     def can_move(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_move(board, row, col, row1, col1):
             return False
-        posr = abs(self.row - row)
-        posc = abs(self.col - col)
+        posr = abs(row - row1)
+        posc = abs(col - col1)
 
         if sorted([posr, posc]) == [1, 2]:
             return True
