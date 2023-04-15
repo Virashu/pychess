@@ -1,5 +1,6 @@
 class Board:
     def __init__(self):
+        self.check = False
         self.color = WHITE
         self.field = []
         for row in range(8):
