@@ -4,8 +4,20 @@ from PIL import Image, ImageTk
 from functools import partial
 
 
+def choose_char(char: str):
+    ...
+
+
 def select_char(color: int) -> str:
     # TODO: Make popup window with type selection
+    top = tk.Toplevel(win)
+    top.geometry('200x200')
+    top.title('child')
+    but_chrs = ['Q', 'R', 'B', 'N']
+
+    for i in but_chrs:
+        cmd = partial(choose_char, )
+        tk.Button(master=top, text=i, width=10, height=10, command=cmd)
     color_char = 'w' if color == bk.WHITE else 'b'
     return 'Q'  # FIXME
 
@@ -13,10 +25,8 @@ def select_char(color: int) -> str:
 def onclick(row, col):
     global move
     if move is None:
-        print('piece:', board.get_piece(row, col), ', is None:', board.get_piece(row, col) is None)
         if board.get_piece(row, col) is not None:
             move = row, col
-        print(move)
     else:
         piece = board.get_piece(*move)
         if isinstance(piece, bk.Pawn):
@@ -30,7 +40,7 @@ def onclick(row, col):
 
         res = board.move_piece(*move, row, col)
         print(res)  # FIXME
-    move = None
+        move = None
     update()
 
 
