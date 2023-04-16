@@ -4,20 +4,47 @@ from PIL import Image, ImageTk
 from functools import partial
 
 
+def select_char(color: int) -> str:
+    # TODO: Make popup window with type selection
+    color_char = 'w' if color == bk.WHITE else 'b'
+    return 'Q'  # FIXME
+
+
 def onclick(row, col):
     global move
     if move is None:
-        move = row, col
+        print('piece:', board.get_piece(row, col), ', is None:', board.get_piece(row, col) is None)
+        if board.get_piece(row, col) is not None:
+            move = row, col
+        print(move)
     else:
-        print(board.move_piece(*move, row, col))
-        move = None
+        piece = board.get_piece(*move)
+        if isinstance(piece, bk.Pawn):
+            color = piece.get_color()
+            if (color == bk.WHITE and row == 7) or (color == bk.BLACK and row == 0):
+                char = select_char(color)
+                board.move_and_promote_pawn(*move, row, col, char)
+                move = None
+                update()
+                return
+
+        res = board.move_piece(*move, row, col)
+        print(res)  # FIXME
+    move = None
     update()
 
 
 def update():
     for i in range(8):
         for j in range(8):
-            bg = 'navajo white' if (i + j) % 2 else 'tan1'
+            type = (i + j) % 2  # 0 is light, 1 is dark
+            bg = ['burlywood1', 'burlywood3'][type]
+            if move is not None:
+                if board.get_piece(*move).can_move(board, *move, i, j):
+                    # bg = ['goldenrod', 'dark goldenrod'][type]
+                    bg = ['cyan2', 'cyan3'][type]
+                if board.get_piece(*move).can_attack(board, *move, i, j):
+                    bg = ['red', 'darkred'][type]
             if move == (i, j):
                 bg = 'green'
 
@@ -33,7 +60,6 @@ def get_image(char: str) -> ImageTk.PhotoImage:
         return holder
     # return ImageTk.PhotoImage(Image.open(f'icons/{char.lower()}.png'))
     return tk.PhotoImage(file=f'icons/{char.lower()}.png')
-
 
 
 board = bk.Board()
@@ -64,7 +90,6 @@ icons = {'  ': holder}
 
 for i in chars:
     icons[i] = get_image(i)
-print(icons)
 
 buttons = []
 
@@ -86,8 +111,6 @@ for i in range(8):
         )
         but.grid(row=i, column=j)
         buttons[i].append(but)
-
-
 
 
 main_frame.pack()

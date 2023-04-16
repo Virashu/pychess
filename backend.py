@@ -86,6 +86,8 @@ class Board:
             return False
         if not piece.can_move(self, row, col, row1, col1) and not piece.can_attack(self, row, col, row1, col1):
             return False
+        if not (piece.get_color() == WHITE and row1 == 7) and not (piece.get_color() == BLACK and row1 == 0):
+            return False
 
         # https://pastebin.com/hmaJ5zDx
         color = piece.get_color()
@@ -135,6 +137,8 @@ class Piece:
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not correct_coords(row1, col1):
+            return False
+        if board.get_piece(row1, col1) is None:
             return False
         if row == row1 and col == col1:
             return False
@@ -340,12 +344,20 @@ class King(Piece):
     def can_move(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_move(board, row, col, row1, col1):
             return False
-        ...
+        mx = abs(col - col1)
+        my = abs(row - row1)
+        if mx not in [-1, 1]:
+            return False
+        if my not in [-1, 1]:
+            return False
+        return True
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_attack(board, row, col, row1, col1):
             return False
-        return self.can_move(board, row, col, row1, col1)  # TODO: "check" check
+        return self.can_move(board, row, col, row1, col1)
+        # TODO: "check" check
+        # TODO: King class can_attack()
 
 
 def opponent(color: int):
