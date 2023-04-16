@@ -103,7 +103,7 @@ class Board:
 
         self.field[row][col] = None
         self.field[row1][col1] = new_piece
-
+        self.color = opponent(self.color)
         return True
 
 
@@ -125,6 +125,8 @@ class Piece:
         pass
 
     def can_move(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
+        if board.current_player_color() != self.color:
+            return False
         if not correct_coords(row1, col1):
             return False
         if row == row1 and col == col1:
@@ -136,6 +138,8 @@ class Piece:
         return True
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
+        if board.current_player_color() != self.color:
+            return False
         if not correct_coords(row1, col1):
             return False
         if board.get_piece(row1, col1) is None:
@@ -346,9 +350,9 @@ class King(Piece):
             return False
         mx = abs(col - col1)
         my = abs(row - row1)
-        if mx not in [-1, 1]:
+        if not mx in [0, 1]:
             return False
-        if my not in [-1, 1]:
+        if not my in [0, 1]:
             return False
         return True
 

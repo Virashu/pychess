@@ -4,22 +4,30 @@ from PIL import Image, ImageTk
 from functools import partial
 
 
-def choose_char(char: str):
-    ...
+def select_char(color: int, but_chars=['Q','R','B','N']) -> str:
+    sel_char = ''
 
+    def choose_char(char: str):
+        nonlocal sel_char, top
+        sel_char = char
+        top.destroy()
 
-def select_char(color: int) -> str:
-    # TODO: Make popup window with type selection
     top = tk.Toplevel(win)
-    top.geometry('200x200')
+    top.geometry('240x90')
     top.title('child')
-    but_chrs = ['Q', 'R', 'B', 'N']
+    frame = tk.Frame(master=top)
 
-    for i in but_chrs:
-        cmd = partial(choose_char, )
-        tk.Button(master=top, text=i, width=10, height=10, command=cmd)
-    color_char = 'w' if color == bk.WHITE else 'b'
-    return 'Q'  # FIXME
+    col = 'w' if color == bk.WHITE else 'b'
+
+    for i, x in enumerate(but_chars):
+        icon = icons[col + x.lower()]
+        cmd = partial(choose_char, x)
+        tk.Button(master=frame, text=x, width=45, height=45, command=cmd, image=icon).grid(row=0, column=i)
+    frame.pack(padx=15, pady=15)
+
+    top.wait_window()
+    
+    return sel_char
 
 
 def onclick(row, col):
@@ -45,6 +53,8 @@ def onclick(row, col):
 
 
 def update():
+    bltext = 'Ходят ' + ('белые' if board.current_player_color() == bk.WHITE else 'черные')
+    bl.config(text=bltext)
     for i in range(8):
         for j in range(8):
             type = (i + j) % 2  # 0 is light, 1 is dark
@@ -124,9 +134,9 @@ for i in range(8):
 
 
 main_frame.pack()
-update()
 bl = tk.Label(text='Chess', fg='black', padx=10, pady=10)
 bl.pack()
+update()
 
 win.mainloop()
 
