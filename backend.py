@@ -1,6 +1,6 @@
 class Board:
     def __init__(self):
-        self.check = False
+        self.check = None
         self.color = WHITE
         self.field = []
         for row in range(8):
@@ -61,16 +61,18 @@ class Board:
         self.field[row][col] = None  # Снять фигуру.
         self.field[row1][col1] = piece  # Поставить на новое место.
         self.color = opponent(self.color)
+        self.check_check(row1, col1, opponent(piece.get_color()))
         return True
 
     def is_under_attack(self, row: int, col: int, color: int) -> bool:
-        for y in self.field:
-            for piece in y:
+        for i in range(8):
+            for j in range(8):
+                piece = self.field[i][j]
                 if piece is None:
                     continue
                 if piece.get_color() != color:
                     continue
-                if piece.can_move(row, col):
+                if piece.can_attack(self, i, j, row, col):
                     return True
         return False
 
@@ -103,8 +105,27 @@ class Board:
 
         self.field[row][col] = None
         self.field[row1][col1] = new_piece
+        self.check_check(opponent(color))
         self.color = opponent(self.color)
         return True
+    
+    def check_check(self, color):
+        # piece = self.field[row][col]
+        # print(type(piece))
+
+        # if piece is None:
+        #     return False
+        for i in range(8):
+            for j in range(8):
+                kpiece = self.field[i][j]
+                if kpiece is None:
+                    continue
+                if isinstance(kpiece, King) and kpiece.get_color() == color:
+                    king_row, king_col = i, j
+                    break
+
+        if self.is_under_attack(king_row, king_col, opponent(color)):
+            self.check = color
 
 
 class Piece:
@@ -354,13 +375,15 @@ class King(Piece):
             return False
         if not my in [0, 1]:
             return False
+        if board.is_under_attack(row1, col1, self.color):
+            return False
         return True
+        # TODO: "check" check
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_attack(board, row, col, row1, col1):
             return False
         return self.can_move(board, row, col, row1, col1)
-        # TODO: "check" check
         # TODO: King class can_attack()
 
 

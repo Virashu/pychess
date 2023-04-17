@@ -54,6 +54,7 @@ def onclick(row, col):
 
 def update():
     bltext = 'Ходят ' + ('белые' if board.current_player_color() == bk.WHITE else 'черные')
+    print('Check:', board.check)
     bl.config(text=bltext)
     for i in range(8):
         for j in range(8):
