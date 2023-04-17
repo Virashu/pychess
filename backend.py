@@ -61,10 +61,15 @@ class Board:
         self.field[row][col] = None  # Снять фигуру.
         self.field[row1][col1] = piece  # Поставить на новое место.
         self.color = opponent(self.color)
-        self.check_check(row1, col1, opponent(piece.get_color()))
+        self.check_check()
         return True
 
     def is_under_attack(self, row: int, col: int, color: int) -> bool:
+        '''Метод, проверяющий, бито ли поле.
+        `row`: Ряд
+        `col`: Колонка
+        `color`: Атакующая сторона
+        '''
         for i in range(8):
             for j in range(8):
                 piece = self.field[i][j]
@@ -105,11 +110,12 @@ class Board:
 
         self.field[row][col] = None
         self.field[row1][col1] = new_piece
-        self.check_check(opponent(color))
+        self.check_check()
         self.color = opponent(self.color)
         return True
     
-    def check_check(self, color):
+    def check_check(self) -> bool:
+        '''Проверяет наличие шаха для обоиз сторон'''
         # piece = self.field[row][col]
         # print(type(piece))
 
@@ -120,12 +126,19 @@ class Board:
                 kpiece = self.field[i][j]
                 if kpiece is None:
                     continue
-                if isinstance(kpiece, King) and kpiece.get_color() == color:
-                    king_row, king_col = i, j
-                    break
-
-        if self.is_under_attack(king_row, king_col, opponent(color)):
-            self.check = color
+                if isinstance(kpiece, King):
+                    # if kpiece.get_color() == WHITE:
+                    #     if self.is_under_attack(i, j, WHITE):
+                    #         self.check = WHITE
+                    #         return
+                    # else:
+                    #     if self.is_under_attack(i, j, WHITE):
+                    #         self.check = BLACK
+                    #         return
+                    if self.is_under_attack(i, j, kpiece.get_color()):
+                        self.check = kpiece.get_color()
+                        return True
+        return False
 
 
 class Piece:
@@ -385,6 +398,8 @@ class King(Piece):
             return False
         return self.can_move(board, row, col, row1, col1)
         # TODO: King class can_attack()
+        # FIXME: Fix recursion issue that appears due to this call scheme:
+        #                   ... -> can_attack() -> can_move() -> is_under_attack() -> can_attack() -> ...
 
 
 def opponent(color: int):
