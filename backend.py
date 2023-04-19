@@ -135,7 +135,7 @@ class Board:
                     #     if self.is_under_attack(i, j, WHITE):
                     #         self.check = BLACK
                     #         return
-                    if self.is_under_attack(i, j, kpiece.get_color()):
+                    if self.is_under_attack(i, j, opponent(kpiece.get_color())):
                         self.check = kpiece.get_color()
                         return True
         return False
@@ -169,6 +169,8 @@ class Piece:
         if piece is not None:
             if piece.get_color() == self.color:
                 return False
+            if isinstance(piece, King):
+                return False
         return True
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
@@ -183,6 +185,8 @@ class Piece:
         piece = board.get_piece(row1, col1)
         if piece is not None:
             if piece.get_color() == self.color:
+                return False
+            if isinstance(piece, King):
                 return False
         return True
 
