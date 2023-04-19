@@ -1,7 +1,6 @@
 '''The chess frontend'''
 from functools import partial
 import tkinter as tk
-from PIL import ImageTk
 import backend as bk
 
 
@@ -74,6 +73,8 @@ def update():
                     bg = ['cyan2', 'cyan3'][type]
                 if board.can_attack(*move, i, j):
                     bg = ['red', 'darkred'][type]
+                # if board.can_attack(*move, i, j) != board.get_piece(*move).can_attack(board, *move, i, j):
+                #     bg = 'blue'
             if move == (i, j):
                 bg = 'green'
 
@@ -84,11 +85,10 @@ def update():
         # print()
 
 
-def get_image(char: str) -> ImageTk.PhotoImage:
+def get_image(char: str) -> tk.PhotoImage:
     '''Returns an image for asked code name'''
     if char == '  ':
         return holder
-    # return ImageTk.PhotoImage(Image.open(f'icons/{char.lower()}.png'))
     return tk.PhotoImage(file=f'icons/{char.lower()}.png')
 
 

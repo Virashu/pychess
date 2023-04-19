@@ -181,9 +181,9 @@ class Board:
         color = piece.get_color()
         if self.color != color:
             return False
-        if att_piece.get_color() == piece.get_color():
+        if att_piece.get_color() == color:
             return False
-        return piece.can_attack(self, row, col, row, col1)
+        return piece.can_attack(self, row, col, row1, col1)
 
 
 class Piece:
