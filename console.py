@@ -20,3 +20,19 @@ def print_board(board: bk.Board) -> None:
 
 while not board.mate:
     # board.update()
+
+# pieces = {
+#     'wK': '♔',
+#     'wQ': '♕',
+#     'wR': '♖',
+#     'wB': '♗',
+#     'wN': '♘',
+#     'wP': '♙',
+#     'bK': '♚',
+#     'bQ': '♛',
+#     'bR': '♜',
+#     'bB': '♝',
+#     'bN': '♞',
+#     'bP': '♟︎',
+#     '  ': ' '
+# }

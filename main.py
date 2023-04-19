@@ -1,11 +1,14 @@
-import backend as bk
-import tkinter as tk
-from PIL import Image, ImageTk
+'''The chess frontend'''
 from functools import partial
+import tkinter as tk
+from PIL import ImageTk
+import backend as bk
 
 
-def select_char(color: int, but_chars=['Q', 'R', 'B', 'N']) -> str:
+def select_char(color: int) -> str:
+    '''Makes a window to select piece'''
     sel_char = ''
+    but_chars=['Q', 'R', 'B', 'N']
 
     def choose_char(char: str):
         nonlocal sel_char, top
@@ -26,33 +29,34 @@ def select_char(color: int, but_chars=['Q', 'R', 'B', 'N']) -> str:
     frame.pack(padx=15, pady=15)
 
     top.wait_window()
-    
+
     return sel_char
 
 
 def onclick(row, col):
+    '''Calls on interaction with board in window'''
     global move
     if move is None:
         if board.get_piece(row, col) is not None:
             move = row, col
     else:
         piece = board.get_piece(*move)
-        if isinstance(piece, bk.Pawn):
-            color = piece.get_color()
-            if (color == bk.WHITE and row == 7) or (color == bk.BLACK and row == 0):
-                char = select_char(color)
-                board.move_and_promote_pawn(*move, row, col, char)
-                move = None
-                update()
-                return
+        color = piece.get_color()
+        if isinstance(piece, bk.Pawn) and \
+           (color == bk.WHITE and row == 7) or (color == bk.BLACK and row == 0):
+            char = select_char(color)
+            board.move_and_promote_pawn(*move, row, col, char)
+            move = None
+            update()
+            return
 
-        res = board.move_piece(*move, row, col)
-        print(res)  # FIXME
+        board.move_piece(*move, row, col)
         move = None
     update()
 
 
 def update():
+    '''Re-draws the board'''
     if board.get_mate() is not None:
         top = tk.Toplevel(master=win)
         lbl = tk.Label(master=top, text='Check and mate')
@@ -81,6 +85,7 @@ def update():
 
 
 def get_image(char: str) -> ImageTk.PhotoImage:
+    '''Returns an image for asked code name'''
     if char == '  ':
         return holder
     # return ImageTk.PhotoImage(Image.open(f'icons/{char.lower()}.png'))
@@ -95,21 +100,7 @@ main_frame = tk.Frame(master=win, padx=10, pady=10, relief=tk.RAISED)
 holder = tk.PhotoImage(width=45, height=45)
 
 move = None
-# pieces = {
-#     'wK': '♔',
-#     'wQ': '♕',
-#     'wR': '♖',
-#     'wB': '♗',
-#     'wN': '♘',
-#     'wP': '♙',
-#     'bK': '♚',
-#     'bQ': '♛',
-#     'bR': '♜',
-#     'bB': '♝',
-#     'bN': '♞',
-#     'bP': '♟︎',
-#     '  ': ' '
-# }
+
 chars = ('wk', 'wq', 'wr', 'wb', 'wn', 'wp', 'bk', 'bq', 'br', 'bb', 'bn', 'bp')
 icons = {'  ': holder}
 
@@ -144,7 +135,3 @@ bl.pack()
 update()
 
 win.mainloop()
-
-# board = bk.Board()
-
-# bk.main()
