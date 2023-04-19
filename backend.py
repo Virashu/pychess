@@ -421,15 +421,11 @@ class King(Piece):
         if board.is_under_attack(row1, col1, opponent(self.color)):
             return False
         return True
-        # TODO: "check" check
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_attack(board, row, col, row1, col1):
             return False
         return self.can_move(board, row, col, row1, col1)
-        # TODO: King class can_attack()
-        # FIXME: Fix recursion issue that appears due to this call scheme:
-        #                   ... -> can_attack() -> can_move() -> is_under_attack() -> can_attack() -> ...
 
 
 def opponent(color: int):
