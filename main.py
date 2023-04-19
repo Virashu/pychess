@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 from functools import partial
 
 
-def select_char(color: int, but_chars=['Q','R','B','N']) -> str:
+def select_char(color: int, but_chars=['Q', 'R', 'B', 'N']) -> str:
     sel_char = ''
 
     def choose_char(char: str):
@@ -53,18 +53,22 @@ def onclick(row, col):
 
 
 def update():
+    if board.get_mate() is not None:
+        top = tk.Toplevel(master=win)
+        lbl = tk.Label(master=top, text='Check and mate')
+        lbl.pack()
     bltext = 'Ходят ' + ('белые' if board.current_player_color() == bk.WHITE else 'черные')
-    print('Check:', board.check)
+    print('Check:', board.get_check())
     bl.config(text=bltext)
     for i in range(8):
         for j in range(8):
             type = (i + j) % 2  # 0 is light, 1 is dark
             bg = ['burlywood1', 'burlywood3'][type]
             if move is not None:
-                if board.get_piece(*move).can_move(board, *move, i, j):
+                if board.can_move(*move, i, j):
                     # bg = ['goldenrod', 'dark goldenrod'][type]
                     bg = ['cyan2', 'cyan3'][type]
-                if board.get_piece(*move).can_attack(board, *move, i, j):
+                if board.can_attack(*move, i, j):
                     bg = ['red', 'darkred'][type]
             if move == (i, j):
                 bg = 'green'

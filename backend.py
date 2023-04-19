@@ -1,26 +1,30 @@
 class Board:
     def __init__(self):
         self.check = None
+        self.mate = None
         self.color = WHITE
         self.field = []
         for row in range(8):
             self.field.append([None] * 8)
-        self.field[0] = [
-            Rook(WHITE), Knight(WHITE), Bishop(WHITE), Queen(WHITE),
-            King(WHITE), Bishop(WHITE), Knight(WHITE), Rook(WHITE)
-        ]
-        self.field[1] = [
-            Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE),
-            Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE)
-        ]
-        self.field[6] = [
-            Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK),
-            Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK)
-        ]
-        self.field[7] = [
-            Rook(BLACK), Knight(BLACK), Bishop(BLACK), Queen(BLACK),
-            King(BLACK), Bishop(BLACK), Knight(BLACK), Rook(BLACK)
-        ]
+        # self.field[0] = [
+        #     Rook(WHITE), Knight(WHITE), Bishop(WHITE), Queen(WHITE),
+        #     King(WHITE), Bishop(WHITE), Knight(WHITE), Rook(WHITE)
+        # ]
+        # self.field[1] = [
+        #     Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE),
+        #     Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE)
+        # ]
+        # self.field[6] = [
+        #     Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK),
+        #     Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK)
+        # ]
+        # self.field[7] = [
+        #     Rook(BLACK), Knight(BLACK), Bishop(BLACK), Queen(BLACK),
+        #     King(BLACK), Bishop(BLACK), Knight(BLACK), Rook(BLACK)
+        # ]
+        self.field[0] = [None, None, None, Pawn(WHITE), King(WHITE), Pawn(WHITE), None, None]
+        self.field[1] = [None, None, None, Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), None, None]
+        self.field[7] = [None, None, None, Queen(WHITE), King(BLACK), Queen(BLACK), None, None]
 
     def current_player_color(self) -> int:
         return self.color
@@ -65,7 +69,7 @@ class Board:
         return True
 
     def is_under_attack(self, row: int, col: int, color: int) -> bool:
-        '''Метод, проверяющий, бито ли поле.
+        '''Метод, проверяющий бито ли поле.
         `row`: Ряд
         `col`: Колонка
         `color`: Атакующая сторона
@@ -107,6 +111,8 @@ class Board:
             new_piece = Bishop(color)
         elif char == 'N':
             new_piece = Knight(color)
+        else:
+            return False
 
         self.field[row][col] = None
         self.field[row1][col1] = new_piece
@@ -114,43 +120,73 @@ class Board:
         self.color = opponent(self.color)
         return True
     
-    def check_check(self) -> bool:
+    def check_check(self) -> None:
         '''Проверяет наличие шаха для обоиз сторон'''
         # piece = self.field[row][col]
         # print(type(piece))
 
         # if piece is None:
         #     return False
+        self.check = None
         for i in range(8):
             for j in range(8):
                 kpiece = self.field[i][j]
                 if kpiece is None:
                     continue
                 if isinstance(kpiece, King):
-                    # if kpiece.get_color() == WHITE:
-                    #     if self.is_under_attack(i, j, WHITE):
-                    #         self.check = WHITE
-                    #         return
-                    # else:
-                    #     if self.is_under_attack(i, j, WHITE):
-                    #         self.check = BLACK
-                    #         return
                     if self.is_under_attack(i, j, opponent(kpiece.get_color())):
                         self.check = kpiece.get_color()
-                        return True
-        return False
+                        self.mate_check()
+
+    def mate_check(self) -> None:
+        if self.check is None:
+            return False
+        for i in range(8):
+            for j in range(8):
+                kpiece = self.field[i][j]
+                if kpiece is None:
+                    continue
+                if isinstance(kpiece, King):
+                    for ii in range(-1, 1):
+                        for jj in range(-1, 1):
+                            if not self.is_under_attack(i + ii, j + jj, opponent(kpiece.get_color())):
+                                return False
+                    self.mate = kpiece.get_color()
+                    return True
+
+    def get_mate(self):
+        return self.mate
+
+    def get_check(self) -> int:
+        return self.check
+
+    def can_move(self, row, col, row1, col1) -> bool:
+        piece = self.field[row][col]
+        if piece is None:
+            return False
+        color = piece.get_color()
+        if self.color != color:
+            return False
+        return piece.can_move(self, row, col, row1, col1)
+
+    def can_attack(self, row, col, row1, col1) -> bool:
+        piece = self.field[row][col]
+        if piece is None:
+            return False
+        att_piece = self.field[row1][col1]
+        if att_piece is None:
+            return False
+        color = piece.get_color()
+        if self.color != color:
+            return False
+        if att_piece.get_color() == piece.get_color():
+            return False
+        return piece.can_attack(self, row, col, row, col1)
 
 
 class Piece:
     def __init__(self, color: int) -> None:
         self.color = color
-
-    def set_position(self, row: int, col: int) -> None:
-        if not correct_coords(row, col):
-            return
-
-        self.row = row
-        self.col = col
 
     def get_color(self) -> int:
         return self.color
@@ -159,8 +195,6 @@ class Piece:
         pass
 
     def can_move(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
-        if board.current_player_color() != self.color:
-            return False
         if not correct_coords(row1, col1):
             return False
         if row == row1 and col == col1:
@@ -168,32 +202,24 @@ class Piece:
         piece = board.get_piece(row1, col1)
         if piece is not None:
             if piece.get_color() == self.color:
-                return False
-            if isinstance(piece, King):
                 return False
         return True
 
     def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
-        if board.current_player_color() != self.color:
-            return False
         if not correct_coords(row1, col1):
-            return False
-        if board.get_piece(row1, col1) is None:
             return False
         if row == row1 and col == col1:
             return False
         piece = board.get_piece(row1, col1)
         if piece is not None:
             if piece.get_color() == self.color:
-                return False
-            if isinstance(piece, King):
                 return False
         return True
 
 
 class Rook(Piece):
     def __init__(self, color: int) -> None:
-        self.color = color
+        super().__init__(color)
 
     def get_color(self) -> int:
         return self.color
@@ -226,7 +252,7 @@ class Rook(Piece):
 
 class Pawn(Piece):
     def __init__(self, color: int) -> None:
-        self.color = color
+        super().__init__(color)
 
     def get_color(self) -> int:
         return self.color
@@ -234,7 +260,7 @@ class Pawn(Piece):
     def char(self) -> str:
         return 'P'
 
-    def can_move(self, board: int, row: int, col: int, row1: int, col1: int) -> bool:
+    def can_move(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_move(board, row, col, row1, col1):
             return False
         if col != col1:
@@ -259,7 +285,7 @@ class Pawn(Piece):
             return True
         return False
 
-    def can_attack(self, board: int, row: int, col: int, row1: int, col1: int) -> bool:
+    def can_attack(self, board: Board, row: int, col: int, row1: int, col1: int) -> bool:
         if not super().can_attack(board, row, col, row1, col1):
             return False
         direction = 1 if (self.color == WHITE) else -1
@@ -388,11 +414,11 @@ class King(Piece):
             return False
         mx = abs(col - col1)
         my = abs(row - row1)
-        if not mx in [0, 1]:
+        if mx not in [0, 1]:
             return False
-        if not my in [0, 1]:
+        if my not in [0, 1]:
             return False
-        if board.is_under_attack(row1, col1, self.color):
+        if board.is_under_attack(row1, col1, opponent(self.color)):
             return False
         return True
         # TODO: "check" check
