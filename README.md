@@ -1,0 +1,5 @@
+
+# PyChess project
+
+Requirements:
+- Pillow
