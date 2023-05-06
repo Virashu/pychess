@@ -7,7 +7,7 @@ import backend as bk
 def select_char(color: int) -> str:
     '''Makes a window to select piece'''
     sel_char = ''
-    but_chars=['Q', 'R', 'B', 'N']
+    but_chars = ['Q', 'R', 'B', 'N']
 
     def choose_char(char: str):
         nonlocal sel_char, top
@@ -60,29 +60,29 @@ def update():
         top = tk.Toplevel(master=win)
         lbl = tk.Label(master=top, text='Check and mate')
         lbl.pack()
+        top.wait_window()
+        quit()
     bltext = 'Ходят ' + ('белые' if board.current_player_color() == bk.WHITE else 'черные')
     print('Check:', board.get_check())
     bl.config(text=bltext)
-    for i in range(8):
+    for i in range(7, -1, -1):
         for j in range(8):
-            type = (i + j) % 2  # 0 is light, 1 is dark
+            type = (i + j + 1) % 2  # 0 is light, 1 is dark
             bg = ['burlywood1', 'burlywood3'][type]
             if move is not None:
                 if board.can_move(*move, i, j):
-                    # bg = ['goldenrod', 'dark goldenrod'][type]
                     bg = ['cyan2', 'cyan3'][type]
                 if board.can_attack(*move, i, j):
                     bg = ['red', 'darkred'][type]
-                # if board.can_attack(*move, i, j) != board.get_piece(*move).can_attack(board, *move, i, j):
-                #     bg = 'blue'
+                if isinstance(board.get_piece(*move), bk.King):
+                    if board.can_castle(*move, i, j):
+                        bg = 'cyan'
             if move == (i, j):
                 bg = 'green'
 
             cell = board.cell(i, j)
             img = icons[cell.lower()]
             buttons[i][j].config(bg=bg, image=img)
-            # print(pieces[cell], end='')
-        # print()
 
 
 def get_image(char: str) -> tk.PhotoImage:
@@ -109,12 +109,12 @@ for i in chars:
 
 buttons = []
 
-for i in range(8):
+for i in range(7, -1, -1):
     buttons.append([])
     for j in range(8):
         bg = 'navajo white' if (i + j) % 2 else 'tan1'
 
-        cmd = partial(onclick, i, j)
+        cmd = partial(onclick, 7 - i, j)
         but = tk.Button(
             master=main_frame,
             # width=40,
@@ -126,7 +126,7 @@ for i in range(8):
             text='ld'
         )
         but.grid(row=i, column=j)
-        buttons[i].append(but)
+        buttons[len(buttons) - 1].append(but)
 
 
 main_frame.pack()

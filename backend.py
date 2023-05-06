@@ -168,6 +168,9 @@ class Board:
         color = piece.get_color()
         if self.color != color:
             return False
+        if isinstance(piece, King):
+            if self.can_castle(row, col, row1, col1):
+                return True
         return piece.can_move(self, row, col, row1, col1)
 
     def can_attack(self, row, col, row1, col1) -> bool:
@@ -184,6 +187,35 @@ class Board:
         if att_piece.get_color() == color:
             return False
         return piece.can_attack(self, row, col, row1, col1)
+
+    def can_castle(self, row: int, col: int, row1: int, col1: int) -> bool:
+        '''Проверка на возможность рокировки Короля'''
+        if col1 not in (0, 7):
+            return False
+        row_ = 0 if self.color == WHITE else 7
+        if row != row1 != row_:
+            return False
+        king = self.field[row][4]
+
+        if not isinstance(king, King):
+            return False
+        if king.get_color() != self.color:
+            return False
+
+        rook = self.field[row][col]
+
+        if not isinstance(rook, Rook):
+            return False
+        if rook.get_color() != self.color:
+            return False
+
+        cells = 4 if col == 0 else 3
+        for i in range(1, cells):
+            if self.field[row][i] is not None:
+                return False
+
+    def castling(self):
+        ...
 
 
 class Piece:
